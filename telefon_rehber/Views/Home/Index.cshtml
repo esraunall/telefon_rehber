@@ -1,0 +1,203 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Telefon Rehberi</title>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+
+   
+        <style >
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        .container {
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        input {
+            margin-bottom: 10px;
+            padding: 5px;
+            width: 100%;
+        }
+
+        button {
+            padding: 8px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+            button:hover {
+                background-color: #2980b9; 
+            }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+
+        th {
+            background-color: #3498db; 
+            color: white;
+        }
+            p {
+                width:150px;
+                background-color: #3498db;
+                color: white;
+                text-align: center;
+                margin-left:680px;
+                font-size:15px;
+            }
+    </style>
+  
+
+</head>
+
+<body>
+
+
+    @*karşımıza ilk kişi bilgilerini isteyen form çıkıyor*@
+    <form id="phoneBookForm">
+        <div class="container">
+            <input type="text" id="name" placeholder="name">
+            <input type="text" id="surname" placeholder="surname">
+            <input type="text" id="phone" placeholder="phone">
+            <input type="text" id="phoneNumber" placeholder="phone number">
+            <input type="text" id="email" placeholder="e-mail">
+            <br /><br />
+            @*kaydetmek için onclick ekledik*@
+            <button type="button" onclick="Save()">KAYDET</button>
+        </div>
+    </form>
+
+    <p>PHONE BOOK</p>
+
+    @*forma kadedilen kişi bilgileri bu tabloda gösterilicek*@
+    <table id="kayitListesi" border="1">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Name</th>
+                <th>Surname</th>
+                <th>Phone</th>
+                <th>PhoneNumber</th>
+                <th>Email</th>
+            </tr>
+        </thead>
+
+    </table>
+
+    <script>
+
+        @*kişiyi kaydeder*@
+        function Save() {
+            var name = $("#name").val();
+            var surname = $("#surname").val();
+            var phone = $("#phone").val();
+            var phoneNumber = $("#phoneNumber").val();
+            var email = $("#email").val();
+
+            if (name == "" || surname == "") {
+                alert("Ad ve soyad alanları boş bırakılamaz!");
+                return;
+            }
+            if (phone == "" && phoneNumber== "") {
+                alert("en az bir telefon numarası girmelisin!");
+                return;
+            }
+
+            @*kişiyi oluştur*@
+            var person = {
+                name: name,
+                surname: surname,
+                phone: phone,
+                phoneNumber: phoneNumber,
+                email: email
+            };
+
+
+           @* AJAX ile API'ye kişi bilgisi gönderme*@
+            $.ajax({
+                type: "GET",
+                url: "/api/save", //adres
+                contentType: "application/json",
+                data: JSON.stringify(person),//jsona dönüştürüyor
+                success: function () {
+                    alert("Kayıt başarıyla kaydedildi.");
+                    GetList();
+                },
+                error: function () {
+                    alert("Kayıt kaydetme işlemi sırasında bir hata oluştu.");
+                }
+            });
+        }
+         //kişiyi düzenleme
+        function Edit(id) {
+            window.open("/edit/" + id, "_blank");
+        }
+
+        //kaydedilen listeyi al
+        function GetList() {
+            $.ajax({
+                type: "GET",
+                url: "/api/list",
+                success: function (data) {
+
+                    //tabloyu güncelle
+
+                    $("#kayitListesi tbody").empty();
+                    $.each(data, function (index, item) {
+                        var row = "<tr>";
+                        row += "<td>" + item.Id + "</td>";
+                        row += "<td>" + item.Name + "</td>";
+                        row += "<td>" + item.Surname + "</td>";
+                        row += "<td>" + item.Phone + "</td>";
+                        row += "<td>" + item.PhoneNumber + "</td>";
+                        row += "<td>" + item.Email + "</td>";
+
+                        //düzenleme butonu
+                        row += "<td><button onclick='Edit(" + item.Id + ")'>DÜZENLE</button></td>";
+                        row += "</tr>";
+
+                        ///yeni satır
+                        $("#kayitListesi tbody").append(row);
+                    });
+                },
+                error: function () {
+                    alert("Kayıt listesi çekilirken bir hata oluştu.");
+                }
+            });
+        5
+        //kayıt listesini çekiyor
+        $(document).ready(function () {
+            GetList();
+        });
+    </script>
+
+    <script>
+        $(".form").submit(function () {
+            // Form verilerini al
+            var data = $(this).serialize();
+
+            // Form verilerini gönder
+            $.post("http://localhost:50655/Home/Index", data, function (response) {
+
+                // Form verilerini işle
+            });
+        });
+
+    </script>
+</body>
+</html>
